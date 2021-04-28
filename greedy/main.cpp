@@ -15,7 +15,7 @@ std::vector <std::pair<float, float>> GetVector()
 
     for (auto v : from_json)
     {
-        auto tmp = v.get<std::vector<float>>();        
+        auto tmp = v.get<std::vector<float>>();     
         vec.push_back({tmp[0], tmp[1]});
     }
 
@@ -23,24 +23,50 @@ std::vector <std::pair<float, float>> GetVector()
 }
 
 
-std::pair<float, float> GetFirstPoint(const std::vector <std::pair<float, float>> vec)
+std::pair<float, float> GetBestSeg(const std::vector<std::pair<float, float>>& vec,
+                                    std::pair<float, float> point)
 {
-    std::pair<float, float> fp = {-1, -1};
+    float current_X = point.second;
     for (auto i : vec)
     {        
-        if (i.first <= 0 && i.first > fp.first)
-            fp = i;
+        if (i.first <= current_X &&
+            //i.first > point.first &&
+            i.second > point.second)
+            point = i;
     }
-    return fp;
+
+    return point;
 }
 
+
+int CalcCount(const std::vector<std::pair<float, float>>& vec)
+{
+    int count = 0;
+    std::pair<float, float> current_point = {0,0};
+
+    for (auto i : vec)
+    {
+        current_point = GetBestSeg(vec, current_point);
+        ++count;
+        
+        if (current_point.second >= 1)
+            return count;
+    }
+
+    return -1;
+}
 
 
 int main()
 {
-    auto vec = GetVector();
+    auto vec = GetVector(); 
 
-    std::vector<std::pair<float,float>> result = {vec[0]};    
+    int count  = CalcCount(vec);
+
+    if (count != -1)
+        std::cout << count << std::endl;
+    else
+        std::cout << "Unsolvable" << std::endl;
 
     return 0;
 }
