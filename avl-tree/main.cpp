@@ -18,10 +18,14 @@ public:
     {
         if (!node) return new Node(k);
 
-        if (k < node->key)
+        if (k < node->key) 
+        {
             left = Insert(node->left, k);
-        else
+        }
+        else 
+        {
             node->right = Insert(node->right, k);
+        }
 
         return BringBalance(node);
     }
@@ -37,10 +41,14 @@ public:
     {
         if (!node) return 0;
 
-        if (k < node->key)
+        if (k < node->key) 
+        {
             node->left = Remove(node->left, k);
-        else if (k > node->key)
+        }
+        else if (k > node->key) 
+        {
             node->right = Remove(node->right, k);	
+        }
         else
         {
             Node* l = node->left;
@@ -77,7 +85,7 @@ private:
 
     int BalanceStatus(const Node* node)
     {
-        return GetHeight(node->right) - GetHeight(node->left);
+        return (int)GetHeight(node->right) - (int)GetHeight(node->left);
     }
 
 
