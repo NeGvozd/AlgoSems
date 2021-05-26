@@ -143,33 +143,4 @@ private:
         }
         return node;
     }
-
-
-    Node* MoveMin(Node* node)
-    {
-        Node* l = node->left;
-        Node* r = node->right;
-
-        if (!l)
-            return r;
-
-        l = MoveMin(l);
-
-        return BringBalance(node);
-    }
-};
-
-
-int main()
-{
-    Node* node = new Node(10);
-
-    for (int i = 0; i < 5; ++i)
-        node = node->Insert(node, rand());
-
-    node = node->Remove(node, 10);
-
-    node->Display(node);
-
-    return 0;
 }
