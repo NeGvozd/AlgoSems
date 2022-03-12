@@ -1,146 +1,165 @@
 #include <iostream>
 
+class Node {
+    Node* _left;
+    Node* _right;
+    int _value = NULL;
+    unsigned int _height;
 
-class Node{
-public:
-    Node* left;
-    Node* right;
-    int key = NULL;
-    unsigned int height;
-
-    unsigned int GetHeight(const Node* node)
+    int BalanceStatus(Node* node)
     {
-        return node ? node->height : 0;
-    }    
-
-
-    Node* Insert(Node* node, const int k)
-    {
-        if (!node) return new Node(k);
-
-        if (k < node->key) 
-        {
-            left = Insert(node->left, k);
-        }
-        else 
-        {
-            node->right = Insert(node->right, k);
-        }
-
-        return BringBalance(node);
+        return (int)getHeight(node->getRight()) - (int)getHeight(node->getLeft());
     }
-
-
-    Node* GetMin(Node* node)
-    {
-        return node->left ? GetMin(node->left) : node;
-    }
-
-
-    Node* Remove(Node* node, const int k)
-    {
-        if (!node) return 0;
-
-        if (k < node->key) 
-        {
-            node->left = Remove(node->left, k);
-        }
-        else if (k > node->key) 
-        {
-            node->right = Remove(node->right, k);	
-        }
-        else
-        {
-            Node* l = node->left;
-            Node* r = node->right;
-            
-            delete node;
-            
-            if (!r) return l;
-
-            Node* min = GetMin(r);
-            min->right = MoveMin(r);
-            min->left = l;
-
-            return BringBalance(min);
-        }
-        return BringBalance(node);
-    }
-
-
-    void Display(const Node* node)
-    {
-        if (node == 0) return;
-
-        Display(node->left);
-
-        std::cout << node->key << " ";
-
-        Display(node->right);
-    }
-
-    Node(int k) {key = k; left = right = 0; height = 1;}
-
-private:
-
-    int BalanceStatus(const Node* node)
-    {
-        return (int)GetHeight(node->right) - (int)GetHeight(node->left);
-    }
-
 
     void FixHeight(Node* node)
     {
-        unsigned int h1 = GetHeight(node->left);
-        unsigned int h2 = GetHeight(node->right);
+        unsigned int h1 = getHeight(node->getLeft());
+        unsigned int h2 = getHeight(node->getRight());
 
-        node->height = (h1 > h2 ? h1 : h2) + 1;
+        node->_height = (h1>h2 ? h1:h2) + 1;
     }
-
 
     Node* RotateLeft(Node* node)
     {
-        Node* rotated = node->right;
+        Node* rotated = node->getRight();
 
-        node->right = rotated->left;
-        rotated->left = node;
+        node->_right = rotated->getLeft();
+        rotated->_left = node;
 
         FixHeight(node);
         FixHeight(rotated);
+
         return rotated;
     }
-
 
     Node* RotateRight(Node* node)
     {
-        Node* rotated = node->left;
+        Node* rotated = node->getLeft();
 
-        node->left = rotated->right;
-        rotated->right = node;
+        node->_left = rotated->getRight();
+        rotated->_right = node;
 
         FixHeight(node);
         FixHeight(rotated);
+
         return rotated;
     }
 
-
-    Node* BringBalance(Node* node)
+    Node* Balance(Node* node)
     {
         FixHeight(node);
 
         if (BalanceStatus(node) >= 2)
         {
-            if (BalanceStatus(node->right) < 0)
-                node->right = RotateRight(node->right);
-            return RotateLeft(node);
+            if (BalanceStatus(node->getRight()) < 0)
+                node->_right = RotateRight(node->getRight());
         }
 
         if (BalanceStatus(node) <= -2)
         {
-            if (BalanceStatus(node->left) > 0)
-                node->left = RotateLeft(node->left);
-            return RotateRight(node);
+            if (BalanceStatus(node->getLeft()) > 0)
+                node->_left = RotateLeft(node->getLeft());
         }
+
         return node;
     }
+
+    Node* MoveMin(Node* node)
+    {
+        Node* l = node->getLeft();
+        Node* r = node->getRight();
+
+        if (!l) return r;
+
+        l = MoveMin(l);
+
+        return Balance(node);
+    }
+
+public:
+    Node* getLeft() { return _left; }
+    Node* getRight() { return _right; }
+    int getValue() { return _value; }
+
+    unsigned int getHeight(Node* node)
+    {
+        return node ? node->_height : 0;
+    }
+
+    Node* getMin(Node* node)
+    {
+        return node->getLeft() ? getMin(node->getLeft()) : node;
+    }
+
+    Node* Insert(Node* node, const int v)
+    {
+        if (!node) return new Node(v);
+
+        if (v < node->getValue())
+            _left = node->getLeft()->Insert(node->getLeft(), v);
+        else
+            _right = node->getRight()->Insert(node->getRight(), v);
+
+        return Balance(node);
+    }
+
+    Node* Remove(Node* node, const int& v)
+    {
+        if (!node) return 0;
+
+        if (v < node->getValue())
+            node->_left = node->getLeft()->Remove(node->getLeft(), v);
+
+        else if (v > node->getValue())
+            node->_right = node->getRight()->Remove(node->getRight(), v);
+
+        else
+        {
+            Node* l = node->getLeft();
+            Node* r = node->getRight();
+
+            delete node;
+
+            if (!r) return l;
+
+            Node* min = getMin(r);
+            min->_right = MoveMin(r);
+            min->_left = l;
+
+            return Balance(min);
+        }
+        return Balance(node);
+    }
+
+
+    void Display(Node* node)
+    {
+        if (node == 0) return;
+
+        Display(node->getLeft());
+
+        std::cout << node->getValue() << " ";
+
+        Display(node->getRight());
+    }
+
+    Node(int v) { _value = v; _left = _right = NULL; _height = 1; }
+};
+
+
+int main()
+{
+    Node* node = new Node(10);
+
+    for (int i=0; i<5; ++i)
+        node = node->Insert(node, rand());
+
+    node->Display(node);
+    std::cout << std::endl;
+
+    node = node->Remove(node, 10);
+
+    node->Display(node);
+
+    return 0;
 }
